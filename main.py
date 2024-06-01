@@ -4,7 +4,8 @@ import requests
 import sys
 import re
 
-serial = "MP09RFK7"
+# serial = "MP09RFK7"
+serial = sys.argv[1]
 components = []
 
 browser = webdriver.Chrome()
@@ -14,7 +15,7 @@ def get_versions():
         url = f'https://pcsupport.lenovo.com/au/en/products/{serial}/downloads/driver-list/component?name={component}'
         browser.get(url)
         soup = BeautifulSoup(browser.page_source, 'html.parser')
-        file = open(f'driver_html/{component.replace("/","")}.html', 'w', encoding='utf-8')
+        file = open(f'driver_html/{component.replace("/","-").replace("%20", " ")}.html', 'w', encoding='utf-8')
         file.write(str(soup.prettify))
         for datarow in soup.find_all(class_="simple-table-dataRow"):
             title = datarow.find(class_="table-body-item").find("span").text
@@ -36,5 +37,6 @@ def get_driver_categories():
 
 if __name__ == "__main__":
     print("running on main")
+    print(f'serial number is {serial}')
     components = get_driver_categories()
     get_versions()
