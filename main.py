@@ -1,26 +1,19 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.firefox.options import Options
 import basic_logger as log
 import sys
 import re
 import os
 
 # configure selenium
-try:
-    if(sys.argv[2] == 'firefox'):
-        options = webdriver.FirefoxOptions()
-        browser = webdriver.Firefox(options)
-except:
-    options = Options()
-    options.add_argument('--headless=new')
-    options.add_argument('--incognito')
-    browser = webdriver.Chrome(options)
+options = Options()
+browser = webdriver.Chrome(options)
 
 # local variables
 serial = sys.argv[1]
 components = []
+componentCount = 0
 
 # paths
 url_base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
@@ -49,12 +42,17 @@ def get_driver_versions(component):
         file = open(file_path, 'w', encoding='utf-8')
         file.write(str(soup.prettify))
         for datarow in soup.find_all(class_="simple-table-dataRow"):
+            component = component.replace("%20", " ")
             title = datarow.find(class_="table-body-item").find("span").text
             version = datarow.find_all(class_="table-body-width-item")
             csv = open(f'{csv_path}', 'a')
-            csv.write(f'{title};{version[0].text};{version[1].text};{version[2].text}\n')
+            csv.write(f'{component};{title};{version[0].text};{version[1].text};{version[2].text}\n')
     except:
         log.error(f'Unable to write to {file_path}')
+    else:
+        global componentCount
+        componentCount = componentCount + 1
+        log.info(f'Captured component {componentCount}/{len(components)}')
 
 def get_driver_categories():
     log.info(f'Getting driver categories...')
@@ -78,5 +76,8 @@ if __name__ == "__main__":
     if len(components) < 1:
         log.error(f'Components list is empty, double check the serial number')
     else: 
+        log.info(f'Number of components: {len(components)}')
         for component in components:
             get_driver_versions(component)
+        if componentCount != len(components):
+            log.error("There was an issue collecting all driver versions")
