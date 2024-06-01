@@ -3,13 +3,15 @@ from selenium import webdriver
 import basic_logger as log
 import sys
 import re
+import os
 
 serial = sys.argv[1]
 components = []
 browser = webdriver.Chrome()
-base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
-driver_path = f'{base_path}/downloads/driver-list'
+url_base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
+driver_path = f'{url_base_path}/downloads/driver-list'
 driver_query_path = f'{driver_path}/component?name='
+file_base_path = f'driver_html/'
 
 def get_html(url):
     log.info(f'Downloading html data from {url}')
@@ -25,7 +27,7 @@ def driver_query(component):
 
 def get_driver_versions(component):
     soup = get_html(driver_query(component))
-    file_path = f'driver_html/{component.replace("/","-").replace("%20", " ")}.html'
+    file_path = f'{file_base_path}{component.replace("/","-").replace("%20", " ")}.html'
 
     try:
         file = open(file_path, 'w', encoding='utf-8')
@@ -50,10 +52,14 @@ def get_driver_categories():
     return category_list
 
 if __name__ == "__main__":
+    if not os.path.exists(file_base_path):
+        log.info(f'Creating driver_html folder')
+        os.makedirs(file_base_path)
+
     log.info(f'Downloading driver information for {serial}...')
     components = get_driver_categories()
 
-    if not len(components) > 0:
+    if len(components) < 1:
         log.error(f'Components list is empty, double check the serial number')
     else: 
         for component in components:
