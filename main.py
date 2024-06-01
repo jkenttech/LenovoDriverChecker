@@ -1,17 +1,33 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 import basic_logger as log
 import sys
 import re
 import os
 
+# configure selenium
+try:
+    if(sys.argv[2] == 'firefox'):
+        options = webdriver.FirefoxOptions()
+        browser = webdriver.Firefox(options)
+except:
+    options = Options()
+    options.add_argument('--headless=new')
+    options.add_argument('--incognito')
+    browser = webdriver.Chrome(options)
+
+# local variables
 serial = sys.argv[1]
 components = []
-browser = webdriver.Chrome()
+
+# paths
 url_base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
 driver_path = f'{url_base_path}/downloads/driver-list'
 driver_query_path = f'{driver_path}/component?name='
-file_base_path = f'driver_html/'
+file_base_path = f'{serial}_driver_html/'
+csv_path = f'{serial}_drivers.csv'
 
 def get_html(url):
     log.info(f'Downloading html data from {url}')
@@ -35,7 +51,7 @@ def get_driver_versions(component):
         for datarow in soup.find_all(class_="simple-table-dataRow"):
             title = datarow.find(class_="table-body-item").find("span").text
             version = datarow.find_all(class_="table-body-width-item")
-            csv = open(f'drivers.csv', 'a')
+            csv = open(f'{csv_path}', 'a')
             csv.write(f'{title};{version[0].text};{version[1].text};{version[2].text}\n')
     except:
         log.error(f'Unable to write to {file_path}')
