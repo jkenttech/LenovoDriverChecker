@@ -1,10 +1,8 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
-import requests
 import sys
 import re
 
-# serial = "MP09RFK7"
 serial = sys.argv[1]
 components = []
 
