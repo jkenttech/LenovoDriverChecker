@@ -53,5 +53,8 @@ if __name__ == "__main__":
     log.info(f'Downloading driver information for {serial}...')
     components = get_driver_categories()
 
-    for component in components:
-        get_driver_versions(component)
+    if not len(components) > 0:
+        log.error(f'Components list is empty, double check the serial number')
+    else: 
+        for component in components:
+            get_driver_versions(component)
