@@ -6,10 +6,13 @@ import re
 serial = sys.argv[1]
 components = []
 browser = webdriver.Chrome()
+base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
+driver_path = f'{base_path}/downloads/driver-list'
+driver_query_path = f'{driver_path}/component?name='
 
-def get_versions():
+def get_driver_versions():
     for component in components:
-        url = f'https://pcsupport.lenovo.com/au/en/products/{serial}/downloads/driver-list/component?name={component}'
+        url = f'{driver_query_path}{component}'
         browser.get(url)
         soup = BeautifulSoup(browser.page_source, 'html.parser')
         file = open(f'driver_html/{component.replace("/","-").replace("%20", " ")}.html', 'w', encoding='utf-8')
@@ -21,7 +24,7 @@ def get_versions():
             csv.write(f'{title};{version[0].text};{version[1].text};{version[2].text}\n')
 
 def get_driver_categories():
-    url = f'https://pcsupport.lenovo.com/au/en/products/{serial}/downloads/driver-list'
+    url = f'{driver_path}'
     browser.get(url)
     soup = BeautifulSoup(browser.page_source, 'html.parser')
     raw_categories = soup.find_all(class_="title-row")
@@ -36,4 +39,4 @@ if __name__ == "__main__":
     print("running on main")
     print(f'serial number is {serial}')
     components = get_driver_categories()
-    get_versions()
+    get_driver_versions()
