@@ -5,7 +5,6 @@ import re
 
 serial = sys.argv[1]
 components = []
-
 browser = webdriver.Chrome()
 
 def get_versions():
