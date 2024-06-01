@@ -10,11 +10,14 @@ base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
 driver_path = f'{base_path}/downloads/driver-list'
 driver_query_path = f'{driver_path}/component?name='
 
+def get_html(url):
+    browser.get(url)
+    return BeautifulSoup(browser.page_source, 'html.parser')
+
+
 def get_driver_versions():
     for component in components:
-        url = f'{driver_query_path}{component}'
-        browser.get(url)
-        soup = BeautifulSoup(browser.page_source, 'html.parser')
+        soup = get_html(f'{driver_query_path}{component}')
         file = open(f'driver_html/{component.replace("/","-").replace("%20", " ")}.html', 'w', encoding='utf-8')
         file.write(str(soup.prettify))
         for datarow in soup.find_all(class_="simple-table-dataRow"):
@@ -24,9 +27,7 @@ def get_driver_versions():
             csv.write(f'{title};{version[0].text};{version[1].text};{version[2].text}\n')
 
 def get_driver_categories():
-    url = f'{driver_path}'
-    browser.get(url)
-    soup = BeautifulSoup(browser.page_source, 'html.parser')
+    soup = get_html(f'{driver_path}')
     raw_categories = soup.find_all(class_="title-row")
     category_list = []
     for category in raw_categories:
