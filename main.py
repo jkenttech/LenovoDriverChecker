@@ -37,19 +37,20 @@ def driver_query(component):
 
 def get_driver_versions(component):
     soup = get_html(driver_query(component))
-    # file_path = f'{file_base_path}{component.replace("/","-").replace("%20", " ")}.html'
 
-    component = component.replace("%20", " ")
+    component = component.replace("%20", " ") # replace the %20 space with acutal space
     try:
-        for datarow in soup.find_all(class_="simple-table-dataRow"):
+        datarows = soup.find_all(class_="simple-table-dataRow")
+        for datarow in datarows:
             title = get_title_from_datarow(component, datarow)
             datarow = datarow.find_all(class_="table-body-width-item")
             size = get_size_from_datarow(component, datarow)
             version = get_version_from_datarow(component, datarow)
             date = get_date_from_datarow(component, datarow)
             link = get_link_from_datarow(component, datarow)
-            csv = open(f'{csv_path}', 'a')
-            csv.write(f'{component};{title};{size};{version};{date};{link}\n')
+            if link[0] != "/": # strips out all of the header rows as the "details" links start with /country/language/
+                csv = open(f'{csv_path}', 'a')
+                csv.write(f'{component};{title};{size};{version};{date};{link}\n')
             log.debug(f'{component};{title};{size};{version};{date};{link}')
     except:
         log.error(f'Unable to get all driver information for {component}')
