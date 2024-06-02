@@ -78,12 +78,13 @@ def get_driver_categories():
     return category_list
 # get_driver_categories()
 
-if __name__ == "__main__":
+def main():
     if not os.path.exists(file_base_path):
         log.info(f'Creating driver_csv folder')
         os.makedirs(file_base_path)
 
     log.info(f'Downloading driver information for {serial}...')
+    global components
     components = get_driver_categories()
 
     if len(components) < 1:
@@ -94,4 +95,8 @@ if __name__ == "__main__":
             get_driver_versions(component)
         if componentCount != len(components):
             log.error("There was an issue collecting all driver versions")
+# end main()
+
+if __name__ == "__main__":
+    main()
 # end if __name__ == "__main__":
