@@ -1,10 +1,15 @@
+# pip imports
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import basic_logger as log
+# standard library imports
 import sys
 import re
 import os
+# local imports
+import basic_logger as log
+import row
+# end of imports
 
 # configure selenium
 options = Options()
@@ -22,17 +27,18 @@ driver_query_path = f'{driver_path}/component?name='
 file_base_path = f'driver_csv'
 csv_path = f'{file_base_path}/{serial}_drivers.csv'
 
-def get_html(url):
-    log.info(f'Downloading html data from {url}')
+def get_html(url): # download the html data
     try:
         browser.get(url)
         return BeautifulSoup(browser.page_source, 'html.parser')
     except:
         log.error(f'There was an error retrieving HTML data.')
+# end get_html(url)
 
 def driver_query(component):
     log.info(f'Querying path {driver_query_path}{component}')
     return f'{driver_query_path}{component}'
+# end driver_query(component)
 
 def get_driver_versions(component):
     soup = get_html(driver_query(component))
@@ -41,12 +47,12 @@ def get_driver_versions(component):
     try:
         datarows = soup.find_all(class_="simple-table-dataRow")
         for datarow in datarows:
-            title = get_title_from_datarow(component, datarow)
+            title = row.get_title_from_datarow(component, datarow)
             datarow = datarow.find_all(class_="table-body-width-item")
-            size = get_size_from_datarow(component, datarow)
-            version = get_version_from_datarow(component, datarow)
-            date = get_date_from_datarow(component, datarow)
-            link = get_link_from_datarow(component, datarow)
+            size = row.get_size_from_datarow(component, datarow)
+            version = row.get_version_from_datarow(component, datarow)
+            date = row.get_date_from_datarow(component, datarow)
+            link = row.get_link_from_datarow(component, datarow)
             if link[0] != "/": # strips out all of the header rows as the "details" links start with /country/language/
                 csv = open(f'{csv_path}', 'a')
                 csv.write(f'{component};{title};{size};{version};{date};{link}\n')
@@ -57,45 +63,7 @@ def get_driver_versions(component):
         global componentCount
         componentCount = componentCount + 1
         log.info(f'Captured component {componentCount}/{len(components)}')
-
-def get_title_from_datarow(component, datarow):
-    try:
-        return datarow.find(class_="table-body-item").find("span").text
-    except:
-        log.error(f'Unable to find {component} title')
-        raise Exception
-
-def get_size_from_datarow(component, datarow):
-    try:
-        return datarow[0].text
-    except:
-        log.error(f'Unable to find {component} size in {datarow}')
-        raise Exception
-
-def get_version_from_datarow(component, datarow):
-    try:
-        return datarow[1].text
-    except:
-        log.error(f'Unable to find {component} size in {datarow}')
-        raise Exception
-
-def get_date_from_datarow(component, datarow):
-    try:
-        return datarow[2].text
-    except:
-        log.error(f'Unable to find {component} date in {datarow}')
-        raise Exception
-
-def get_link_from_datarow(component, datarow):
-    try:
-        link = datarow[4]
-        link = str(link).split("href=\"")
-        link = link[1].split("\"")
-        return link[0]
-    except:
-        log.error(f'Unable to find {component} link in {datarow}')
-        log.error(f'Specific line {datarow[4]}')
-        raise Exception
+# end get_driver_versions(component)
 
 def get_driver_categories():
     log.info(f'Getting driver categories...')
@@ -107,6 +75,7 @@ def get_driver_categories():
         category = re.sub(r'\s', '%20', category)
         category_list.append(category)
     return category_list
+# get_driver_categories()
 
 if __name__ == "__main__":
     if not os.path.exists(file_base_path):
@@ -124,3 +93,4 @@ if __name__ == "__main__":
             get_driver_versions(component)
         if componentCount != len(components):
             log.error("There was an issue collecting all driver versions")
+# end if __name__ == "__main__":
