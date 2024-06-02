@@ -13,6 +13,7 @@ import row
 
 # configure selenium
 options = Options()
+options.add_argument('--headless=old')
 browser = webdriver.Chrome(options)
 
 # local variables
