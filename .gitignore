@@ -3,4 +3,6 @@ __pycache__
 chromedriver
 *drivers.csv
 *driver_html/*.html
+*~
+*.exe
 
