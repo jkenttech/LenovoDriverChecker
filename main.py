@@ -5,10 +5,10 @@ from selenium.webdriver.chrome.options import Options
 # standard library imports
 import sys
 import re
-import os
 # local imports
-import basic_logger as log
-import datarow as row
+import basic_logger as log # singleton
+from csv_writer import csv_writer # import class
+import datarow as row # singleton
 # end of imports
 
 # configure selenium
@@ -27,8 +27,6 @@ componentCount = 0
 url_base_path = f'https://pcsupport.lenovo.com/au/en/products/{serial}'
 driver_path = f'{url_base_path}/downloads/driver-list'
 driver_query_path = f'{driver_path}/component?name='
-file_base_path = f'driver_csv'
-csv_path = f'{file_base_path}/{serial}_drivers.csv'
 
 def get_html(url): # download the html data
     try:
@@ -82,17 +80,8 @@ def get_driver_categories():
     return category_list
 # get_driver_categories()
 
-def writeToCSV(driver_list):
-        csv = open(f'{csv_path}', 'a')
-        for driver in driver_list:
-            csv.write(f'{driver}\n')
-        csv.close()
-# writeToCSV(driver_list)
-
 def main():
-    if not os.path.exists(file_base_path):
-        log.info(f'Creating driver_csv folder')
-        os.makedirs(file_base_path)
+    writer = csv_writer(serial)
 
     log.info(f'Downloading driver information for {serial}...')
     global components
@@ -105,7 +94,7 @@ def main():
         driver_list = []
         for component in components:
             driver_list.extend(get_driver_versions(component))
-        writeToCSV(driver_list)
+        writer.write_to_csv(driver_list)
         if componentCount != len(components):
             log.error("There was an issue collecting all driver versions")
 # end main()
