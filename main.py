@@ -8,7 +8,7 @@ import re
 import os
 # local imports
 import basic_logger as log
-import row
+import datarow as row
 # end of imports
 
 # configure selenium
