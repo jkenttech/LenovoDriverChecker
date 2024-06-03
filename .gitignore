@@ -5,4 +5,5 @@ chromedriver
 *driver_html/*.html
 *~
 *.exe
+!exe/*.exe
 
