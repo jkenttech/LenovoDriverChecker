@@ -13,7 +13,9 @@ import row
 
 # configure selenium
 options = Options()
-options.add_argument('--headless=old')
+# options.add_argument('--headless=old')
+options.add_argument('-no-sandbox')
+options.add_argument('incognito')
 browser = webdriver.Chrome(options)
 
 # local variables
