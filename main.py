@@ -44,28 +44,30 @@ def driver_query(component):
 # end driver_query(component)
 
 def get_driver_versions(component):
+    driver_versions = []
     soup = get_html(driver_query(component))
 
     component = component.replace("%20", " ") # replace the %20 space with acutal space
+    component = component.replace(",", "") # replace comma with space for clean csv output
     try:
         datarows = soup.find_all(class_="simple-table-dataRow")
         for datarow in datarows:
-            title = row.get_title_from_datarow(component, datarow)
+            title = row.get_title_from_datarow(component, datarow).replace(",","")
             datarow = datarow.find_all(class_="table-body-width-item")
-            size = row.get_size_from_datarow(component, datarow)
-            version = row.get_version_from_datarow(component, datarow)
-            date = row.get_date_from_datarow(component, datarow)
+            size = row.get_size_from_datarow(component, datarow).replace(",","")
+            version = row.get_version_from_datarow(component, datarow).replace(",","")
+            date = row.get_date_from_datarow(component, datarow).replace(",","")
             link = row.get_link_from_datarow(component, datarow)
             if link[0] != "/": # strips out all of the header rows as the "details" links start with /country/language/
-                csv = open(f'{csv_path}', 'a')
-                csv.write(f'{component};{title};{size};{version};{date};{link}\n')
-            log.debug(f'{component};{title};{size};{version};{date};{link}')
+                current_driver = f'{component},{title},{size},{version},{date},{link}'
+                driver_versions.append(current_driver)
     except:
         log.error(f'Unable to get all driver information for {component}')
     else:
         global componentCount
         componentCount = componentCount + 1
         log.info(f'Captured component {componentCount}/{len(components)}')
+        return driver_versions
 # end get_driver_versions(component)
 
 def get_driver_categories():
@@ -80,6 +82,13 @@ def get_driver_categories():
     return category_list
 # get_driver_categories()
 
+def writeToCSV(driver_list):
+        csv = open(f'{csv_path}', 'a')
+        for driver in driver_list:
+            csv.write(f'{driver}\n')
+        csv.close()
+# writeToCSV(driver_list)
+
 def main():
     if not os.path.exists(file_base_path):
         log.info(f'Creating driver_csv folder')
@@ -93,8 +102,10 @@ def main():
         log.error(f'Components list is empty, double check the serial number')
     else: 
         log.info(f'Number of components: {len(components)}')
+        driver_list = []
         for component in components:
-            get_driver_versions(component)
+            driver_list.extend(get_driver_versions(component))
+        writeToCSV(driver_list)
         if componentCount != len(components):
             log.error("There was an issue collecting all driver versions")
 # end main()
