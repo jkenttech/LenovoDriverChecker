@@ -38,14 +38,14 @@ def get_html(url): # download the html data
         log.error(f'There was an error retrieving HTML data.')
 # end get_html(url)
 
-def driver_query(component):
+def query_driver(component):
     log.info(f'Querying path {driver_query_path}{component}')
     return f'{driver_query_path}{component}'
 # end driver_query(component)
 
 def get_driver_versions(component):
     driver_versions = []
-    soup = get_html(driver_query(component))
+    soup = get_html(query_driver(component))
 
     component = component.replace("%20", " ") # replace the %20 space with acutal space
     component = component.replace(",", "") # replace comma with space for clean csv output
