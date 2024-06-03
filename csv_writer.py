@@ -8,6 +8,7 @@ class csv_writer:
         self.serial = serial
         self.csv_path = f'{self.file_base_path}/{self.serial}_drivers.csv'
         self.check_path_exists()
+    # end __init__(self, serial):
 
 
     def write_to_csv(self, driver_list):
